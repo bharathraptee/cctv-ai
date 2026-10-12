@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raptee Showroom AI — Footfall & Zone Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-main: #0B0F19;
+      --bg-card: #111827;
+      --bg-card-hover: #1A2236;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(56, 189, 248, 0.3);
+      --text-primary: #F9FAFB;
+      --text-secondary: #9CA3AF;
+      --text-muted: #6B7280;
+      --accent-cyan: #38BDF8;
+      --accent-green: #10B981;
+      --accent-purple: #818CF8;
+      --accent-orange: #FB923C;
+      --accent-red: #F87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Header */
+    header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #0284C7, #38BDF8);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: white;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.35rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-green);
+      letter-spacing: 0.05em;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .refresh-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .kpi-card.cyan::before { background: var(--accent-cyan); }
+    .kpi-card.green::before { background: var(--accent-green); }
+    .kpi-card.purple::before { background: var(--accent-purple); }
+    .kpi-card.orange::before { background: var(--accent-orange); }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .kpi-value {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin: 0.4rem 0 0.2rem;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi-subtext {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .kpi-subtext.highlight {
+      color: var(--accent-orange);
+      font-weight: 500;
+    }
+
+    /* Charts Row */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 1100px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .chart-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .chart-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-top: 0.15rem;
+    }
+
+    .chart-container {
+      position: relative;
+      flex: 1;
+      min-height: 280px;
+    }
+
+    /* Events Log & Zone Breakdown Section */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 1rem;
+      max-height: 380px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-secondary);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.55rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .badge-zone-t30 {
+      background: rgba(251, 146, 60, 0.15);
+      color: var(--accent-orange);
+      border: 1px solid rgba(251, 146, 60, 0.3);
+    }
+
+    .badge-zone-general {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .thumb-preview {
+      width: 48px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .thumb-preview:hover {
+      transform: scale(1.1);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Modal for Image Preview */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      max-width: 900px;
+      max-height: 85vh;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .status-msg {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand-section">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <div class="brand-title">Raptee Showroom AI</div>
+        <div class="brand-subtitle">Real-time Visitor Footfall & Zone Intelligence</div>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE SYNC
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadDashboardData()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- KPI Overview Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card cyan">
+        <div class="kpi-label">Today's Total Footfall</div>
+        <div class="kpi-value" id="kpiTotalFootfall">—</div>
+        <div class="kpi-subtext">Total unique person detections today</div>
+      </div>
+
+      <div class="kpi-card green">
+        <div class="kpi-label">Currently in Showroom</div>
+        <div class="kpi-value" id="kpiActiveVisitors">—</div>
+        <div class="kpi-subtext">Active visitors detected right now</div>
+      </div>
+
+      <div class="kpi-card orange">
+        <div class="kpi-label">T30 Red Zone Visits</div>
+        <div class="kpi-value" id="kpiT30Visits">—</div>
+        <div class="kpi-subtext highlight" id="kpiT30Subtext">0% of visitors engaged with bike</div>
+      </div>
+
+      <div class="kpi-card purple">
+        <div class="kpi-label">Avg Dwell Time</div>
+        <div class="kpi-value" id="kpiAvgDwell">—</div>
+        <div class="kpi-subtext" id="kpiPeakHour">Peak Hour: Calculating...</div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-grid">
+      <!-- Hourly Footfall Bar Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Hourly Showroom Traffic</div>
+            <div class="chart-subtitle">Visitor arrival volume across operating hours (Today)</div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="hourlyChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Zone Engagement Breakdown -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Zone Engagement Share</div>
+            <div class="chart-subtitle">T30 Red Bike vs General Showroom Floor</div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="zoneChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tables & Dwell Distribution -->
+    <div class="content-grid">
+      <!-- Recent Visitor Events Table -->
+      <div class="section-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Recent Visitor Sessions</div>
+            <div class="chart-subtitle">Latest people tracked across showroom cameras</div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="eventsTable">
+            <thead>
+              <tr>
+                <th>Snapshot</th>
+                <th>Camera</th>
+                <th>Zone</th>
+                <th>Duration</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="eventsTableBody">
+              <tr><td colspan="5" class="status-msg">Loading visitor events...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Customer Dwell Time Breakdown -->
+      <div class="section-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Customer Dwell Time Distribution</div>
+            <div class="chart-subtitle">How long visitors stay around showroom displays</div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="dwellChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Snapshot Modal -->
+  <div class="modal" id="imageModal" onclick="this.classList.remove('active')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <img id="modalImg" src="" alt="Snapshot Full View" />
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = (window.location.port === '8080' || window.location.pathname.startsWith('/api'))
+      ? ''
+      : 'http://localhost:5000';
+
+    let hourlyChart = null;
+    let zoneChart = null;
+    let dwellChart = null;
+
+    // Helper: Format duration
+    function formatDuration(seconds) {
+      if (!seconds || seconds <= 0) return '< 30s';
+      const m = Math.floor(seconds / 60);
+      const s = Math.round(seconds % 60);
+      if (m === 0) return `${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    // Helper: Format epoch timestamp to local time
+    function formatTime(epochSec) {
+      if (!epochSec) return 'Active now';
+      const date = new Date(epochSec * 1000);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function showModal(src) {
+      const modal = document.getElementById('imageModal');
+      const img = document.getElementById('modalImg');
+      img.src = src;
+      modal.classList.add('active');
+    }
+
+    // Main Data Fetcher
+    async function loadDashboardData() {
+      try {
+        const [eventsRes, inProgressRes] = await Promise.all([
+          fetch(`${API_BASE}/api/events?limit=500`).catch(() => null),
+          fetch(`${API_BASE}/api/events?in_progress=1`).catch(() => null)
+        ]);
+
+        if (!eventsRes || !eventsRes.ok) return;
+
+        const events = await eventsRes.json();
+        const inProgressEvents = inProgressRes && inProgressRes.ok ? await inProgressRes.json() : [];
+
+        processMetrics(events, inProgressEvents);
+      } catch (err) {
+        console.error("Dashboard data load error:", err);
+      }
+    }
+
+    function processMetrics(events, activeEvents) {
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+
+      const todayPersons = events.filter(e => e.label === 'person' && (e.start_time >= startOfDay || !e.end_time));
+      const activePersonCount = activeEvents.filter(e => e.label === 'person').length;
+
+      document.getElementById('kpiTotalFootfall').textContent = todayPersons.length;
+      document.getElementById('kpiActiveVisitors').textContent = activePersonCount;
+
+      const t30Events = todayPersons.filter(e => {
+        const zones = e.zones || e.entered_zones || [];
+        return zones.some(z => z.toLowerCase().includes('t30') || z.toLowerCase().includes('red'));
+      });
+      document.getElementById('kpiT30Visits').textContent = t30Events.length;
+
+      const t30Ratio = todayPersons.length > 0
+        ? Math.round((t30Events.length / todayPersons.length) * 100)
+        : 0;
+      document.getElementById('kpiT30Subtext').textContent = `${t30Ratio}% of visitors engaged with bike`;
+
+      const completedEvents = todayPersons.filter(e => e.end_time && e.start_time);
+      const totalDuration = completedEvents.reduce((acc, e) => acc + (e.end_time - e.start_time), 0);
+      const avgDwellSec = completedEvents.length > 0 ? totalDuration / completedEvents.length : 0;
+      document.getElementById('kpiAvgDwell').textContent = formatDuration(avgDwellSec);
+
+      // Hourly Distribution Data (9 AM to 9 PM)
+      const hourCounts = {};
+      for (let h = 9; h <= 21; h++) hourCounts[h] = 0;
+
+      let peakHour = 17;
+      let peakCount = 0;
+
+      todayPersons.forEach(e => {
+        const d = new Date(e.start_time * 1000);
+        const h = d.getHours();
+        if (hourCounts[h] !== undefined) {
+          hourCounts[h]++;
+          if (hourCounts[h] > peakCount) {
+            peakCount = hourCounts[h];
+            peakHour = h;
+          }
+        }
+      });
+
+      const peakHourFormatted = `${peakHour % 12 || 12}:00 ${peakHour >= 12 ? 'PM' : 'AM'}`;
+      document.getElementById('kpiPeakHour').textContent = `Peak Rush: ~${peakHourFormatted}`;
+
+      renderHourlyChart(hourCounts, peakHour);
+      renderZoneChart(t30Events.length, todayPersons.length - t30Events.length);
+      renderDwellChart(completedEvents);
+      renderTable(todayPersons.slice(0, 20));
+    }
+
+    // --- STANDARD CHARTS RENDERING ---
+    function renderHourlyChart(hourCounts, peakHour) {
+      const labels = Object.keys(hourCounts).map(h => {
+        const hour = parseInt(h, 10);
+        return `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'}`;
+      });
+      const data = Object.values(hourCounts);
+      const bgColors = Object.keys(hourCounts).map(h => {
+        return parseInt(h, 10) === peakHour ? '#FB923C' : '#38BDF8';
+      });
+
+      if (hourlyChart) {
+        hourlyChart.data.labels = labels;
+        hourlyChart.data.datasets[0].data = data;
+        hourlyChart.data.datasets[0].backgroundColor = bgColors;
+        hourlyChart.update();
+        return;
+      }
+
+      const ctx = document.getElementById('hourlyChart').getContext('2d');
+      hourlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Visitors',
+            data: data,
+            backgroundColor: bgColors,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#9CA3AF', font: { size: 11 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#9CA3AF', precision: 0 },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function renderZoneChart(t30Count, floorCount) {
+      const data = [t30Count, Math.max(0, floorCount)];
+
+      if (zoneChart) {
+        zoneChart.data.datasets[0].data = data;
+        zoneChart.update();
+        return;
+      }
+
+      const ctx = document.getElementById('zoneChart').getContext('2d');
+      zoneChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['T30 Red Display', 'General Showroom'],
+          datasets: [{
+            data: data,
+            backgroundColor: ['#FB923C', '#38BDF8'],
+            borderColor: '#111827',
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#9CA3AF', font: { size: 12 }, padding: 15 }
+            }
+          },
+          cutout: '72%'
+        }
+      });
+    }
+
+    function renderDwellChart(completedEvents) {
+      let b1 = 0, b2 = 0, b3 = 0, b4 = 0;
+
+      completedEvents.forEach(e => {
+        const sec = e.end_time - e.start_time;
+        if (sec < 60) b1++;
+        else if (sec <= 180) b2++;
+        else if (sec <= 420) b3++;
+        else b4++;
+      });
+
+      const data = [b1, b2, b3, b4];
+
+      if (dwellChart) {
+        dwellChart.data.datasets[0].data = data;
+        dwellChart.update();
+        return;
+      }
+
+      const ctx = document.getElementById('dwellChart').getContext('2d');
+      dwellChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['< 1 min', '1 - 3 mins', '3 - 7 mins', '> 7 mins'],
+          datasets: [{
+            label: 'Visitors',
+            data: data,
+            backgroundColor: ['#818CF8', '#38BDF8', '#10B981', '#FB923C'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#9CA3AF', precision: 0 },
+              beginAtZero: true
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: '#9CA3AF' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderTable(events) {
+      const tbody = document.getElementById('eventsTableBody');
+      if (!events || events.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="status-msg">No visitor events recorded yet. Walk in front of cameras to generate data!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = events.map(e => {
+        const durationSec = e.end_time ? (e.end_time - e.start_time) : 0;
+        const zones = e.zones || e.entered_zones || [];
+        const isT30 = zones.some(z => z.toLowerCase().includes('t30') || z.toLowerCase().includes('red'));
+
+        const zoneBadge = isT30
+          ? `<span class="badge badge-zone-t30">T30 Red</span>`
+          : zones.length > 0
+          ? `<span class="badge badge-zone-general">${zones[0]}</span>`
+          : `<span style="color: var(--text-muted);">Floor</span>`;
+
+        const thumbUrl = `${API_BASE}/api/events/${e.id}/thumbnail.jpg`;
+        const snapUrl = `${API_BASE}/api/events/${e.id}/snapshot.jpg`;
+
+        return `
+          <tr>
+            <td>
+              <img class="thumb-preview" src="${thumbUrl}" alt="Event" onerror="this.style.display='none'" onclick="showModal('${snapUrl}')" />
+            </td>
+            <td style="font-weight: 500;">${e.camera.replace(/_/g, ' ')}</td>
+            <td>${zoneBadge}</td>
+            <td>${formatDuration(durationSec)}</td>
+            <td style="color: var(--text-secondary);">${formatTime(e.start_time)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Initial Load
+    loadDashboardData();
+
+    // Auto-refresh data every 5 seconds
+    setInterval(loadDashboardData, 5000);
+  </script>
+</body>
+</html>

@@ -7,8 +7,6 @@ debug
 .mcp.json
 .vscode/*
 !.vscode/launch.json
-config/*
-!config/*.example
 models
 *.mp4
 *.db
@@ -23,6 +21,10 @@ core
 !/web/**/*.ts
 .idea/*
 .ipynb_checkpoints
+
+# Track media folder but ignore all CCTV photos, clips, and thumbnails
+media/**/*
+!media/**/.gitkeep
 
 # Auto-generated Docker Compose Generator config files
 docs/src/components/DockerComposeGenerator/config/devices.ts

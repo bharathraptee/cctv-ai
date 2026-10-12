@@ -1,0 +1,107 @@
+mqtt:
+  enabled: false
+
+# Hardware detection acceleration: defaults to CPU
+# If you have an Intel CPU with OpenVINO or a Coral TPU, you can enable it here
+# detectors:
+#   ov:
+#     type: openvino
+#     device: CPU
+
+# Enable go2rtc for ultra low-latency WebRTC/MSE streaming and stream sharing
+go2rtc:
+  streams:
+    showroom_cam_157:
+      - "rtsp://admin:CCTV%40Raptee@10.0.0.157:554/stream1"
+    showroom_cam_009:
+      - "rtsp://admin:CCTV%40Raptee@10.0.0.9:554/ch01/stream1"
+    showroom_cam_152:
+      - "rtsp://admin:CCTV%40Raptee@10.0.0.152:554/ch02/stream1"
+    showroom_cam_056:
+      - "rtsp://admin:CCTV%40Raptee@10.0.0.56:554/ch04/stream1"
+
+# Global detection and object tracking settings
+objects:
+  track:
+    - person
+    - motorcycle
+    - car
+    - bicycle
+
+# Birdseye view: combined live view of all 4 cameras
+birdseye:
+  enabled: true
+  mode: continuous
+
+# Recording configuration
+record:
+  enabled: true
+  retain:
+    days: 3
+    mode: all
+  alerts:
+    retain:
+      days: 14
+      mode: active_objects
+  detections:
+    retain:
+      days: 7
+      mode: motion
+
+# Camera definitions
+cameras:
+  showroom_cam_157:
+    ffmpeg:
+      inputs:
+        - path: "rtsp://127.0.0.1:8554/showroom_cam_157"
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+            - detect
+    detect:
+      enabled: true
+      width: 1920
+      height: 1080
+      fps: 5
+
+  showroom_cam_009:
+    ffmpeg:
+      inputs:
+        - path: "rtsp://127.0.0.1:8554/showroom_cam_009"
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+            - detect
+    detect:
+      enabled: true
+      width: 1920
+      height: 1080
+      fps: 5
+
+  showroom_cam_152:
+    ffmpeg:
+      inputs:
+        - path: "rtsp://127.0.0.1:8554/showroom_cam_152"
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+            - detect
+    detect:
+      enabled: true
+      width: 1920
+      height: 1080
+      fps: 5
+
+  showroom_cam_056:
+    ffmpeg:
+      inputs:
+        - path: "rtsp://127.0.0.1:8554/showroom_cam_056"
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+            - detect
+    detect:
+      enabled: true
+      width: 1920
+      height: 1080
+      fps: 5

@@ -1,0 +1,99 @@
+mqtt:
+  enabled: false
+
+# OpenVINO Detector & YOLOv8 Model Configuration (Frigate 0.14)
+detectors:
+  ov:
+    type: openvino
+    device: CPU
+
+model:
+  path: /config/model_cache/yolov8n.onnx
+  labelmap_path: /config/model_cache/coco-80.txt
+  model_type: yolo-generic
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_pixel_format: rgb
+  input_dtype: float
+
+# Enable go2rtc for ultra low-latency WebRTC/MSE streaming and stream sharing
+go2rtc:
+  streams:
+    showroom_cam_157:
+      - rtsp://admin:CCTV%40Raptee@10.0.0.157:554/stream1
+
+
+# Global detection and object tracking settings
+objects:
+  track:
+    - person
+    - motorcycle
+birdseye:
+  enabled: true
+  mode: continuous
+
+# Recording configuration
+record:
+  enabled: true
+  alerts:
+    retain:
+      days: 14
+      mode: active_objects
+  detections:
+    retain:
+      days: 7
+      mode: motion
+
+# Camera definitions
+  continuous:
+    days: 3
+  motion:
+    days: 3
+cameras:
+  showroom_cam_157:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/showroom_cam_157
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+            - detect
+    detect:
+      enabled: true
+      width: 1920
+      height: 1080
+      fps: 5
+
+    zones:
+      t30_red_:
+        coordinates: 0.269,0.328,0.396,0.626,0.584,0.427,0.52,0.211,0.354,0.145
+        enabled: true
+        inertia: 3
+        loitering_time: 0
+        friendly_name: 't30 red '
+    review:
+      alerts:
+        required_zones:
+          - t30_red_
+        labels:
+          - person
+          - motorcycle
+
+version: 0.18-0
+camera_groups: {}
+audio:
+  listen: []
+snapshots:
+  timestamp: true
+  crop: true
+classification:
+  custom:
+    employee:
+      enabled: true
+      name: employee
+      threshold: 0.8
+      object_config:
+        objects:
+          - person
+        classification_type: attribute
