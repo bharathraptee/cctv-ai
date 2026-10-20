@@ -249,6 +249,62 @@
       border-color: var(--accent-cyan);
     }
 
+    /* Date & Period Selector */
+    .range-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.25rem 0.65rem;
+    }
+
+    .range-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .range-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 0.78rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .range-select:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .custom-dates {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .date-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 0.75rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 5px;
+      outline: none;
+      font-family: inherit;
+      color-scheme: dark;
+    }
+
+    .date-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
     /* Section Headers */
     .section-header-compact {
       display: flex;
@@ -616,8 +672,27 @@
       </div>
     </div>
     <div class="header-controls">
+      <!-- Date & Period Filter -->
+      <div class="range-control">
+        <label for="timeRangeSelect" class="range-label">Period:</label>
+        <select id="timeRangeSelect" class="range-select" onchange="onTimeRangeChange()">
+          <option value="today">Today (Live)</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="last_7_days">Last 7 Days</option>
+          <option value="this_month">This Month</option>
+          <option value="last_month">Last Month</option>
+          <option value="custom">Custom Range...</option>
+        </select>
+        <div id="customDateInputs" class="custom-dates" style="display: none;">
+          <input type="date" id="startDateInput" class="date-input" onchange="onCustomDateChange()" />
+          <span style="color: var(--text-muted); font-size: 0.75rem;">to</span>
+          <input type="date" id="endDateInput" class="date-input" onchange="onCustomDateChange()" />
+        </div>
+      </div>
+
+      <!-- Footfall Inflow Direction -->
       <div class="direction-control">
-        <label for="footfallDirectionSelect" class="direction-label">Footfall Inflow:</label>
+        <label for="footfallDirectionSelect" class="direction-label">Inflow:</label>
         <select id="footfallDirectionSelect" class="direction-select" onchange="onDirectionChange()">
           <option value="none">Any Direction (Time Spent / Total Visits)</option>
           <option value="top_down">Top-to-Bottom (↓ In / ↑ Out)</option>
@@ -626,6 +701,7 @@
           <option value="right_left">Right-to-Left (← In / → Out)</option>
         </select>
       </div>
+
       <div class="live-badge">
         <div class="live-dot"></div>
         LIVE SYNC
@@ -647,13 +723,13 @@
       </div>
 
       <div class="kpi-card green">
-        <div class="kpi-label">Currently in Showroom</div>
+        <div class="kpi-label" id="kpiActiveLabel">Currently in Showroom</div>
         <div class="kpi-value" id="kpiActiveVisitors">—</div>
         <div class="kpi-subtext" id="kpiActiveSubtext">Net visitors inside</div>
       </div>
 
       <div class="kpi-card orange">
-        <div class="kpi-label">Zone Visits</div>
+        <div class="kpi-label" id="kpiZoneVisitsLabel">Zone Visits</div>
         <div class="kpi-value" id="kpiZoneVisits">—</div>
         <div class="kpi-subtext highlight" id="kpiZoneSubtext">0% of visitors in designated zones</div>
       </div>
@@ -684,8 +760,8 @@
       <div class="chart-card">
         <div class="chart-header">
           <div>
-            <div class="chart-title">Hourly Showroom Traffic</div>
-            <div class="chart-subtitle">Visitor arrival volume across operating hours (Today)</div>
+            <div class="chart-title" id="trafficChartTitle">Hourly Showroom Traffic</div>
+            <div class="chart-subtitle" id="trafficChartSubtitle">Visitor arrival volume across operating hours (Today)</div>
           </div>
         </div>
         <div class="chart-container">
@@ -810,6 +886,88 @@
       }
     }
 
+    // Time Range Management
+    function getTimeRangeBounds() {
+      const select = document.getElementById('timeRangeSelect');
+      const mode = select ? select.value : 'today';
+      const now = new Date();
+      let start, end;
+      let label = "Today";
+
+      if (mode === 'yesterday') {
+        const yStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 0, 0, 0);
+        const yEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59);
+        start = yStart.getTime() / 1000;
+        end = yEnd.getTime() / 1000;
+        label = "Yesterday";
+      } else if (mode === 'last_7_days') {
+        const d7 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0);
+        start = d7.getTime() / 1000;
+        end = now.getTime() / 1000;
+        label = "Last 7 Days";
+      } else if (mode === 'this_month') {
+        const mStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+        start = mStart.getTime() / 1000;
+        end = now.getTime() / 1000;
+        label = "This Month";
+      } else if (mode === 'last_month') {
+        const lmStart = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
+        const lmEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        start = lmStart.getTime() / 1000;
+        end = lmEnd.getTime() / 1000;
+        label = "Last Month";
+      } else if (mode === 'custom') {
+        const sInput = document.getElementById('startDateInput');
+        const eInput = document.getElementById('endDateInput');
+        if (sInput && sInput.value) {
+          const sp = sInput.value.split('-');
+          start = new Date(parseInt(sp[0]), parseInt(sp[1]) - 1, parseInt(sp[2]), 0, 0, 0).getTime() / 1000;
+        } else {
+          start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7, 0, 0, 0).getTime() / 1000;
+        }
+        if (eInput && eInput.value) {
+          const ep = eInput.value.split('-');
+          end = new Date(parseInt(ep[0]), parseInt(ep[1]) - 1, parseInt(ep[2]), 23, 59, 59).getTime() / 1000;
+        } else {
+          end = now.getTime() / 1000;
+        }
+        label = "Custom Period";
+      } else {
+        // default: 'today'
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        start = todayStart.getTime() / 1000;
+        end = now.getTime() / 1000;
+        label = "Today";
+      }
+
+      return { mode, start, end, label };
+    }
+
+    function onTimeRangeChange() {
+      const select = document.getElementById('timeRangeSelect');
+      const customDiv = document.getElementById('customDateInputs');
+      if (select && select.value === 'custom') {
+        if (customDiv) customDiv.style.display = 'flex';
+        const sInput = document.getElementById('startDateInput');
+        const eInput = document.getElementById('endDateInput');
+        if (sInput && !sInput.value) {
+          const past = new Date();
+          past.setDate(past.getDate() - 7);
+          sInput.value = past.toISOString().split('T')[0];
+        }
+        if (eInput && !eInput.value) {
+          eInput.value = new Date().toISOString().split('T')[0];
+        }
+      } else {
+        if (customDiv) customDiv.style.display = 'none';
+      }
+      loadDashboardData();
+    }
+
+    function onCustomDateChange() {
+      loadDashboardData();
+    }
+
     // Helper: Determine movement direction using trajectory vector
     function getMovementDirection(event, direction) {
       if (!direction) direction = getSelectedDirection();
@@ -857,8 +1015,13 @@
     // Main Data Fetcher
     async function loadDashboardData() {
       try {
+        const timeRange = getTimeRangeBounds();
+        let eventsUrl = `${API_BASE}/api/events?limit=500`;
+        if (timeRange.start) eventsUrl += `&after=${Math.floor(timeRange.start)}`;
+        if (timeRange.end && timeRange.mode !== 'today') eventsUrl += `&before=${Math.floor(timeRange.end)}`;
+
         const [eventsRes, inProgressRes, configRes] = await Promise.all([
-          fetch(`${API_BASE}/api/events?limit=500`).catch(() => null),
+          fetch(eventsUrl).catch(() => null),
           fetch(`${API_BASE}/api/events?in_progress=1`).catch(() => null),
           fetch(`${API_BASE}/api/config`).catch(() => null)
         ]);
@@ -869,33 +1032,39 @@
         const inProgressEvents = inProgressRes && inProgressRes.ok ? await inProgressRes.json() : [];
         const frigateConfig = configRes && configRes.ok ? await configRes.json() : null;
 
-        processMetrics(events, inProgressEvents, frigateConfig);
+        processMetrics(events, inProgressEvents, frigateConfig, timeRange);
       } catch (err) {
         console.error("Dashboard data load error:", err);
       }
     }
 
-    function processMetrics(events, activeEvents, frigateConfig) {
+    function processMetrics(events, activeEvents, frigateConfig, timeRange) {
+      if (!timeRange) timeRange = getTimeRangeBounds();
       const chosenDir = getSelectedDirection();
       const dirSelect = document.getElementById('footfallDirectionSelect');
       if (dirSelect && dirSelect.value !== chosenDir) {
         dirSelect.value = chosenDir;
       }
 
-      const now = new Date();
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+      // Filter persons for the selected time window
+      const periodPersons = events.filter(e => {
+        if (e.label !== 'person') return false;
+        if (timeRange.mode === 'today') {
+          return e.start_time >= timeRange.start || !e.end_time;
+        }
+        return e.start_time >= timeRange.start && e.start_time <= timeRange.end;
+      });
 
-      const todayPersons = events.filter(e => e.label === 'person' && (e.start_time >= startOfDay || !e.end_time));
       const activePersonCount = activeEvents.filter(e => e.label === 'person').length;
 
       // 1. FOOTFALL ZONE CALCULATION
-      const footfallEvents = todayPersons.filter(e => {
+      const footfallEvents = periodPersons.filter(e => {
         const zones = e.zones || e.entered_zones || [];
         return zones.some(z => z.toLowerCase().includes('footfall'));
       });
 
       const hasFootfallZone = footfallEvents.length > 0;
-      const targetFootfallEvents = hasFootfallZone ? footfallEvents : todayPersons;
+      const targetFootfallEvents = hasFootfallZone ? footfallEvents : periodPersons;
 
       let inCount = 0;
       let outCount = 0;
@@ -907,11 +1076,11 @@
         const totalDwell = completedFootfall.reduce((acc, e) => acc + (e.end_time - e.start_time), 0);
         const avgDwell = completedFootfall.length > 0 ? (totalDwell / completedFootfall.length) : 0;
 
-        document.getElementById('kpiFootfallLabel').textContent = "Today's Footfall";
+        document.getElementById('kpiFootfallLabel').textContent = timeRange.mode === 'today' ? "Today's Footfall" : `${timeRange.label} Footfall`;
         document.getElementById('kpiTotalFootfall').textContent = totalVisits;
         document.getElementById('kpiFootfallSubtext').textContent = hasFootfallZone
           ? `Crossed 'footfall' zone (Any Direction) • Avg Time: ${formatDuration(avgDwell)}`
-          : `All visitors detected today (Draw a 'footfall' zone in Frigate UI)`;
+          : `All visitors detected in period (Draw a 'footfall' zone in Frigate UI)`;
       } else {
         // Directional mode
         targetFootfallEvents.forEach(e => {
@@ -921,11 +1090,11 @@
         });
 
         if (!hasFootfallZone) {
-          inCount = todayPersons.length;
+          inCount = periodPersons.length;
           outCount = 0;
         }
 
-        document.getElementById('kpiFootfallLabel').textContent = "Today's Footfall (In)";
+        document.getElementById('kpiFootfallLabel').textContent = timeRange.mode === 'today' ? "Today's Footfall (In)" : `${timeRange.label} Footfall (In)`;
         document.getElementById('kpiTotalFootfall').textContent = inCount;
         document.getElementById('kpiFootfallSubtext').textContent = hasFootfallZone
           ? `Crossed 'footfall' line (In: ${inCount} | Out: ${outCount})`
@@ -935,66 +1104,111 @@
       const netInside = Math.max(0, inCount - outCount);
 
       // KPI 2: Currently in Showroom
-      document.getElementById('kpiActiveVisitors').textContent = activePersonCount > 0 ? activePersonCount : (chosenDir !== 'none' ? netInside : 0);
-      document.getElementById('kpiActiveSubtext').textContent = activePersonCount > 0
-        ? `Active visitors detected across all cameras right now`
-        : (hasFootfallZone && chosenDir !== 'none' ? `Net inside: ${netInside} (In: ${inCount} - Out: ${outCount})` : `No active visitors detected right now`);
+      if (timeRange.mode === 'today') {
+        document.getElementById('kpiActiveLabel').textContent = "Currently in Showroom";
+        document.getElementById('kpiActiveVisitors').textContent = activePersonCount > 0 ? activePersonCount : (chosenDir !== 'none' ? netInside : 0);
+        document.getElementById('kpiActiveSubtext').textContent = activePersonCount > 0
+          ? `Active visitors detected across all cameras right now`
+          : (hasFootfallZone && chosenDir !== 'none' ? `Net inside: ${netInside} (In: ${inCount} - Out: ${outCount})` : `No active visitors detected right now`);
+      } else {
+        document.getElementById('kpiActiveLabel').textContent = "Net Inside (Period End)";
+        document.getElementById('kpiActiveVisitors').textContent = chosenDir !== 'none' ? netInside : 0;
+        document.getElementById('kpiActiveSubtext').textContent = chosenDir !== 'none'
+          ? `Calculated Net: In (${inCount}) - Out (${outCount}) for ${timeRange.label}`
+          : `Live presence only active in "Today" mode`;
+      }
 
       // Dynamic Zone Visits: Count visitors who entered any configured zone
-      const zoneEvents = todayPersons.filter(e => {
+      const zoneEvents = periodPersons.filter(e => {
         const zones = e.zones || e.entered_zones || [];
         return zones.length > 0;
       });
+      document.getElementById('kpiZoneVisitsLabel').textContent = timeRange.mode === 'today' ? "Zone Visits" : `${timeRange.label} Zone Visits`;
       document.getElementById('kpiZoneVisits').textContent = zoneEvents.length;
 
-      const zoneRatio = todayPersons.length > 0
-        ? Math.round((zoneEvents.length / todayPersons.length) * 100)
+      const zoneRatio = periodPersons.length > 0
+        ? Math.round((zoneEvents.length / periodPersons.length) * 100)
         : 0;
       document.getElementById('kpiZoneSubtext').textContent = `${zoneRatio}% of visitors in designated zones`;
 
-      const completedEvents = todayPersons.filter(e => e.end_time && e.start_time);
+      const completedEvents = periodPersons.filter(e => e.end_time && e.start_time);
       const totalDuration = completedEvents.reduce((acc, e) => acc + (e.end_time - e.start_time), 0);
       const avgDwellSec = completedEvents.length > 0 ? totalDuration / completedEvents.length : 0;
       document.getElementById('kpiAvgDwell').textContent = formatDuration(avgDwellSec);
 
-      // Hourly Distribution Data (9 AM to 9 PM)
-      const hourCounts = {};
-      for (let h = 9; h <= 21; h++) hourCounts[h] = 0;
-
-      let peakHour = 17;
+      // Timeline Distribution (Hourly if <= 1 day, Daily if > 1 day)
+      const isMultiDay = (timeRange.end - timeRange.start) > 86400;
+      const timelineCounts = {};
+      let peakKey = '';
       let peakCount = 0;
 
-      const hourlySource = (chosenDir === 'none')
-        ? (hasFootfallZone ? footfallEvents : todayPersons)
-        : (hasFootfallZone ? footfallEvents.filter(e => getMovementDirection(e, chosenDir) === 'in') : todayPersons);
+      const timelineSource = (chosenDir === 'none')
+        ? (hasFootfallZone ? footfallEvents : periodPersons)
+        : (hasFootfallZone ? footfallEvents.filter(e => getMovementDirection(e, chosenDir) === 'in') : periodPersons);
 
-      hourlySource.forEach(e => {
-        const d = new Date(e.start_time * 1000);
-        const h = d.getHours();
-        if (hourCounts[h] !== undefined) {
-          hourCounts[h]++;
-          if (hourCounts[h] > peakCount) {
-            peakCount = hourCounts[h];
-            peakHour = h;
-          }
+      if (isMultiDay) {
+        // Group by Day
+        const curDate = new Date(timeRange.start * 1000);
+        const endDate = new Date(timeRange.end * 1000);
+        while (curDate <= endDate) {
+          const key = curDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+          timelineCounts[key] = 0;
+          curDate.setDate(curDate.getDate() + 1);
         }
-      });
 
-      const peakHourFormatted = `${peakHour % 12 || 12}:00 ${peakHour >= 12 ? 'PM' : 'AM'}`;
-      document.getElementById('kpiPeakHour').textContent = `Peak Rush: ~${peakHourFormatted}`;
+        timelineSource.forEach(e => {
+          const d = new Date(e.start_time * 1000);
+          const key = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+          if (timelineCounts[key] !== undefined) {
+            timelineCounts[key]++;
+            if (timelineCounts[key] > peakCount) {
+              peakCount = timelineCounts[key];
+              peakKey = key;
+            }
+          }
+        });
+
+        document.getElementById('trafficChartTitle').textContent = 'Daily Showroom Traffic';
+        document.getElementById('trafficChartSubtitle').textContent = `Visitor arrival volume by day (${timeRange.label})`;
+        document.getElementById('kpiPeakHour').textContent = peakKey ? `Peak Day: ${peakKey} (${peakCount} visitors)` : 'Peak: No events in period';
+
+        renderTrafficChart(timelineCounts, peakKey, true);
+      } else {
+        // Single Day: Group by Hour (9 AM to 9 PM)
+        for (let h = 9; h <= 21; h++) timelineCounts[h] = 0;
+        let peakHour = 17;
+
+        timelineSource.forEach(e => {
+          const d = new Date(e.start_time * 1000);
+          const h = d.getHours();
+          if (timelineCounts[h] !== undefined) {
+            timelineCounts[h]++;
+            if (timelineCounts[h] > peakCount) {
+              peakCount = timelineCounts[h];
+              peakHour = h;
+            }
+          }
+        });
+
+        const peakHourFormatted = `${peakHour % 12 || 12}:00 ${peakHour >= 12 ? 'PM' : 'AM'}`;
+        document.getElementById('trafficChartTitle').textContent = 'Hourly Showroom Traffic';
+        document.getElementById('trafficChartSubtitle').textContent = `Visitor arrival volume across operating hours (${timeRange.label})`;
+        document.getElementById('kpiPeakHour').textContent = `Peak Rush: ~${peakHourFormatted}`;
+
+        renderTrafficChart(timelineCounts, peakHour, false);
+      }
 
       // Render per-camera occupancy and separate zone KPIs
-      renderCameraOccupancy(events, activeEvents, frigateConfig);
-      renderAllZonesKPIs(todayPersons, activeEvents, frigateConfig);
+      renderCameraOccupancy(events, activeEvents, frigateConfig, periodPersons);
+      renderAllZonesKPIs(periodPersons, activeEvents, frigateConfig);
 
-      renderHourlyChart(hourCounts, peakHour);
-      renderZoneChart(todayPersons);
+      renderZoneChart(periodPersons);
       renderDwellChart(completedEvents);
-      renderTable(todayPersons.slice(0, 20), chosenDir);
+      renderTable(periodPersons.slice(0, 20), chosenDir);
     }
 
     // --- PER-CAMERA LIVE OCCUPANCY ---
-    function renderCameraOccupancy(events, activeEvents, frigateConfig) {
+    function renderCameraOccupancy(events, activeEvents, frigateConfig, periodPersons) {
       const container = document.getElementById('cameraOccupancyGrid');
       if (!container) return;
 
@@ -1014,7 +1228,9 @@
 
       container.innerHTML = cameraList.map(cam => {
         const activeCount = activeEvents.filter(e => e.camera === cam && e.label === 'person').length;
-        const todayCount = events.filter(e => e.camera === cam && e.label === 'person').length;
+        const periodCount = periodPersons
+          ? periodPersons.filter(e => e.camera === cam && e.label === 'person').length
+          : events.filter(e => e.camera === cam && e.label === 'person').length;
         const displayName = cam.replace(/_/g, ' ').toUpperCase();
         const isLive = activeCount > 0;
 
@@ -1028,7 +1244,7 @@
               </span>
             </div>
             <div class="cam-count">${activeCount}</div>
-            <div class="cam-subtext">${activeCount === 1 ? 'Person currently here' : 'People currently here'} &bull; ${todayCount} today</div>
+            <div class="cam-subtext">${activeCount === 1 ? 'Person currently here' : 'People currently here'} &bull; ${periodCount} in period</div>
           </div>
         `;
       }).join('');
@@ -1135,14 +1351,17 @@
     }
 
     // --- STANDARD CHARTS RENDERING ---
-    function renderHourlyChart(hourCounts, peakHour) {
-      const labels = Object.keys(hourCounts).map(h => {
-        const hour = parseInt(h, 10);
-        return `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'}`;
-      });
-      const data = Object.values(hourCounts);
-      const bgColors = Object.keys(hourCounts).map(h => {
-        return parseInt(h, 10) === peakHour ? '#FB923C' : '#38BDF8';
+    function renderTrafficChart(counts, peakKey, isMultiDay) {
+      const labels = isMultiDay
+        ? Object.keys(counts)
+        : Object.keys(counts).map(h => {
+            const hour = parseInt(h, 10);
+            return `${hour % 12 || 12} ${hour >= 12 ? 'PM' : 'AM'}`;
+          });
+      const data = Object.values(counts);
+      const bgColors = Object.keys(counts).map(k => {
+        const isMatch = isMultiDay ? (k === peakKey) : (parseInt(k, 10) === peakKey);
+        return isMatch ? '#FB923C' : '#38BDF8';
       });
 
       if (hourlyChart) {
