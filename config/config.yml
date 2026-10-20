@@ -17,23 +17,17 @@ model:
   input_pixel_format: rgb
   input_dtype: float
 
-# Enable go2rtc for ultra low-latency WebRTC/MSE streaming and stream sharing
-go2rtc:
-  streams:
-    showroom_cam_157:
-      - rtsp://admin:CCTV%40Raptee@10.0.0.157:554/stream1
-
-
-# Global detection and object tracking settings
+# Global detection and object tracking settings (Applies to all cameras automatically)
 objects:
   track:
     - person
     - motorcycle
+
 birdseye:
   enabled: true
   mode: continuous
 
-# Recording configuration
+# Global recording retention configuration
 record:
   enabled: true
   alerts:
@@ -45,16 +39,21 @@ record:
       days: 7
       mode: motion
 
+# Enable go2rtc for ultra low-latency WebRTC/MSE streaming and stream sharing
+# Add your cameras below. Replace <username>, <password>, and <camera_ip> with your actual camera details.
+go2rtc:
+  streams:
+    camera_1:
+      - rtsp://admin:password@<camera_ip>:554/stream1
+    # camera_2:
+    #   - rtsp://admin:password@<camera_ip>:554/stream1
+
 # Camera definitions
-  continuous:
-    days: 3
-  motion:
-    days: 3
 cameras:
-  showroom_cam_157:
+  camera_1:
     ffmpeg:
       inputs:
-        - path: rtsp://127.0.0.1:8554/showroom_cam_157
+        - path: rtsp://127.0.0.1:8554/camera_1
           input_args: preset-rtsp-restream
           roles:
             - record
@@ -65,35 +64,12 @@ cameras:
       height: 1080
       fps: 5
 
-    zones:
-      t30_red_:
-        coordinates: 0.269,0.328,0.396,0.626,0.584,0.427,0.52,0.211,0.354,0.145
-        enabled: true
-        inertia: 3
-        loitering_time: 0
-        friendly_name: 't30 red '
-    review:
-      alerts:
-        required_zones:
-          - t30_red_
-        labels:
-          - person
-          - motorcycle
+    # Custom zones can be drawn interactively using your mouse in the Frigate UI (http://localhost:5000)!
+    # Go to: Settings -> Cameras -> camera_1 -> Zones
+    # zones:
+    #   entrance:
+    #     coordinates: 0.1,0.2,0.3,0.4...
 
-version: 0.18-0
-camera_groups: {}
-audio:
-  listen: []
 snapshots:
   timestamp: true
   crop: true
-classification:
-  custom:
-    employee:
-      enabled: true
-      name: employee
-      threshold: 0.8
-      object_config:
-        objects:
-          - person
-        classification_type: attribute

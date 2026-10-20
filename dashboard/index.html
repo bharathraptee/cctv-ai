@@ -422,21 +422,21 @@
     <!-- KPI Overview Cards -->
     <div class="kpi-grid">
       <div class="kpi-card cyan">
-        <div class="kpi-label">Today's Total Footfall</div>
+        <div class="kpi-label">Today's Footfall (In)</div>
         <div class="kpi-value" id="kpiTotalFootfall">—</div>
-        <div class="kpi-subtext">Total unique person detections today</div>
+        <div class="kpi-subtext" id="kpiFootfallSubtext">Crossed footfall line</div>
       </div>
 
       <div class="kpi-card green">
         <div class="kpi-label">Currently in Showroom</div>
         <div class="kpi-value" id="kpiActiveVisitors">—</div>
-        <div class="kpi-subtext">Active visitors detected right now</div>
+        <div class="kpi-subtext" id="kpiActiveSubtext">Net visitors inside</div>
       </div>
 
       <div class="kpi-card orange">
-        <div class="kpi-label">T30 Red Zone Visits</div>
-        <div class="kpi-value" id="kpiT30Visits">—</div>
-        <div class="kpi-subtext highlight" id="kpiT30Subtext">0% of visitors engaged with bike</div>
+        <div class="kpi-label">Zone Visits</div>
+        <div class="kpi-value" id="kpiZoneVisits">—</div>
+        <div class="kpi-subtext highlight" id="kpiZoneSubtext">0% of visitors in designated zones</div>
       </div>
 
       <div class="kpi-card purple">
@@ -466,7 +466,7 @@
         <div class="chart-header">
           <div>
             <div class="chart-title">Zone Engagement Share</div>
-            <div class="chart-subtitle">T30 Red Bike vs General Showroom Floor</div>
+            <div class="chart-subtitle">Distribution across all configured zones</div>
           </div>
         </div>
         <div class="chart-container">
@@ -550,6 +550,30 @@
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
+    // Helper: Determine movement direction (in vs out) using trajectory vector (Method A)
+    function getMovementDirection(event) {
+      if (event && event.data) {
+        // 1. Check path_data trajectory points if available
+        if (Array.isArray(event.data.path_data) && event.data.path_data.length >= 2) {
+          const first = event.data.path_data[0];
+          const last = event.data.path_data[event.data.path_data.length - 1];
+          const dy = last[1] - first[1]; // Y movement (inward vs outward)
+          const dx = last[0] - first[0];
+          if (Math.abs(dy) >= Math.abs(dx)) {
+            return dy >= 0 ? 'in' : 'out';
+          } else {
+            return dx >= 0 ? 'in' : 'out';
+          }
+        }
+        // 2. Fallback to velocity_angle (0 to 180 = downward/inward, 180 to 360 = upward/outward)
+        if (typeof event.data.velocity_angle === 'number') {
+          const angle = event.data.velocity_angle;
+          return (angle >= 0 && angle <= 180) ? 'in' : 'out';
+        }
+      }
+      return 'in';
+    }
+
     function showModal(src) {
       const modal = document.getElementById('imageModal');
       const img = document.getElementById('modalImg');
@@ -583,33 +607,72 @@
       const todayPersons = events.filter(e => e.label === 'person' && (e.start_time >= startOfDay || !e.end_time));
       const activePersonCount = activeEvents.filter(e => e.label === 'person').length;
 
-      document.getElementById('kpiTotalFootfall').textContent = todayPersons.length;
-      document.getElementById('kpiActiveVisitors').textContent = activePersonCount;
-
-      const t30Events = todayPersons.filter(e => {
+      // --- METHOD A: FOOTFALL VIA 'footfall' TRIPWIRE ZONE ---
+      const footfallEvents = todayPersons.filter(e => {
         const zones = e.zones || e.entered_zones || [];
-        return zones.some(z => z.toLowerCase().includes('t30') || z.toLowerCase().includes('red'));
+        return zones.some(z => z.toLowerCase().includes('footfall'));
       });
-      document.getElementById('kpiT30Visits').textContent = t30Events.length;
 
-      const t30Ratio = todayPersons.length > 0
-        ? Math.round((t30Events.length / todayPersons.length) * 100)
+      const hasFootfallZone = footfallEvents.length > 0;
+      let inCount = 0;
+      let outCount = 0;
+      const targetFootfallEvents = hasFootfallZone ? footfallEvents : todayPersons;
+
+      targetFootfallEvents.forEach(e => {
+        const dir = getMovementDirection(e);
+        if (dir === 'in') inCount++;
+        else outCount++;
+      });
+
+      if (!hasFootfallZone) {
+        // Fallback: If 'footfall' zone is not yet drawn, count detected persons as In
+        inCount = todayPersons.length;
+        outCount = 0;
+      }
+
+      const netInside = Math.max(0, inCount - outCount);
+
+      // KPI 1: Footfall (In)
+      document.getElementById('kpiTotalFootfall').textContent = inCount;
+      document.getElementById('kpiFootfallSubtext').textContent = hasFootfallZone
+        ? `Crossed 'footfall' line (In: ${inCount} | Out: ${outCount})`
+        : `All people (Draw a 'footfall' zone in UI for line-crossing)`;
+
+      // KPI 2: Currently in Showroom
+      document.getElementById('kpiActiveVisitors').textContent = activePersonCount > 0 ? activePersonCount : netInside;
+      document.getElementById('kpiActiveSubtext').textContent = hasFootfallZone
+        ? `Net inside: ${netInside} (In: ${inCount} - Out: ${outCount})`
+        : `Active visitors detected right now`;
+
+      // Dynamic Zone Visits: Count visitors who entered any configured zone
+      const zoneEvents = todayPersons.filter(e => {
+        const zones = e.zones || e.entered_zones || [];
+        return zones.length > 0;
+      });
+      document.getElementById('kpiZoneVisits').textContent = zoneEvents.length;
+
+      const zoneRatio = todayPersons.length > 0
+        ? Math.round((zoneEvents.length / todayPersons.length) * 100)
         : 0;
-      document.getElementById('kpiT30Subtext').textContent = `${t30Ratio}% of visitors engaged with bike`;
+      document.getElementById('kpiZoneSubtext').textContent = `${zoneRatio}% of visitors in designated zones`;
 
       const completedEvents = todayPersons.filter(e => e.end_time && e.start_time);
       const totalDuration = completedEvents.reduce((acc, e) => acc + (e.end_time - e.start_time), 0);
       const avgDwellSec = completedEvents.length > 0 ? totalDuration / completedEvents.length : 0;
       document.getElementById('kpiAvgDwell').textContent = formatDuration(avgDwellSec);
 
-      // Hourly Distribution Data (9 AM to 9 PM)
+      // Hourly Distribution Data (9 AM to 9 PM) - Incoming Footfall
       const hourCounts = {};
       for (let h = 9; h <= 21; h++) hourCounts[h] = 0;
 
       let peakHour = 17;
       let peakCount = 0;
 
-      todayPersons.forEach(e => {
+      const hourlySource = hasFootfallZone
+        ? footfallEvents.filter(e => getMovementDirection(e) === 'in')
+        : todayPersons;
+
+      hourlySource.forEach(e => {
         const d = new Date(e.start_time * 1000);
         const h = d.getHours();
         if (hourCounts[h] !== undefined) {
@@ -625,7 +688,7 @@
       document.getElementById('kpiPeakHour').textContent = `Peak Rush: ~${peakHourFormatted}`;
 
       renderHourlyChart(hourCounts, peakHour);
-      renderZoneChart(t30Events.length, todayPersons.length - t30Events.length);
+      renderZoneChart(todayPersons);
       renderDwellChart(completedEvents);
       renderTable(todayPersons.slice(0, 20));
     }
@@ -680,11 +743,36 @@
       });
     }
 
-    function renderZoneChart(t30Count, floorCount) {
-      const data = [t30Count, Math.max(0, floorCount)];
+    function renderZoneChart(todayPersons) {
+      const zoneCounts = {};
+      let floorCount = 0;
+
+      todayPersons.forEach(e => {
+        const zones = e.zones || e.entered_zones || [];
+        if (zones && zones.length > 0) {
+          zones.forEach(z => {
+            const zName = z.replace(/_/g, ' ');
+            zoneCounts[zName] = (zoneCounts[zName] || 0) + 1;
+          });
+        } else {
+          floorCount++;
+        }
+      });
+
+      const labels = Object.keys(zoneCounts);
+      const data = Object.values(zoneCounts);
+      if (floorCount > 0 || labels.length === 0) {
+        labels.push('General Area');
+        data.push(floorCount);
+      }
+
+      const palette = ['#FB923C', '#38BDF8', '#10B981', '#818CF8', '#F472B6', '#FBBF24'];
+      const bgColors = labels.map((_, i) => palette[i % palette.length]);
 
       if (zoneChart) {
+        zoneChart.data.labels = labels;
         zoneChart.data.datasets[0].data = data;
+        zoneChart.data.datasets[0].backgroundColor = bgColors;
         zoneChart.update();
         return;
       }
@@ -693,10 +781,10 @@
       zoneChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['T30 Red Display', 'General Showroom'],
+          labels: labels,
           datasets: [{
             data: data,
-            backgroundColor: ['#FB923C', '#38BDF8'],
+            backgroundColor: bgColors,
             borderColor: '#111827',
             borderWidth: 3
           }]
@@ -776,13 +864,12 @@
       tbody.innerHTML = events.map(e => {
         const durationSec = e.end_time ? (e.end_time - e.start_time) : 0;
         const zones = e.zones || e.entered_zones || [];
-        const isT30 = zones.some(z => z.toLowerCase().includes('t30') || z.toLowerCase().includes('red'));
-
-        const zoneBadge = isT30
-          ? `<span class="badge badge-zone-t30">T30 Red</span>`
-          : zones.length > 0
-          ? `<span class="badge badge-zone-general">${zones[0]}</span>`
-          : `<span style="color: var(--text-muted);">Floor</span>`;
+        const isFootfall = zones.some(z => z.toLowerCase().includes('footfall'));
+        const dir = isFootfall ? getMovementDirection(e) : null;
+        const dirBadge = dir ? (dir === 'in' ? ' (IN)' : ' (OUT)') : '';
+        const zoneBadge = zones.length > 0
+          ? `<span class="badge badge-zone-general">${zones.map(z => z.replace(/_/g, ' ')).join(', ')}${dirBadge}</span>`
+          : `<span style="color: var(--text-muted);">General</span>`;
 
         const thumbUrl = `${API_BASE}/api/events/${e.id}/thumbnail.jpg`;
         const snapUrl = `${API_BASE}/api/events/${e.id}/snapshot.jpg`;
