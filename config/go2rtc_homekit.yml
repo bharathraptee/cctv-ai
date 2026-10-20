@@ -1,0 +1,7 @@
+streams:
+  capitol_:
+    - ffmpeg:rtsp://admin:CCTV@Raptee@10.0.0.56:554/stream1
+  quality_inspection:
+    - ffmpeg:rtsp://admin:CCTV@Raptee@10.0.0.41:554/stream1
+  electronics_lab:
+    - ffmpeg:rtsp://admin:CCTV@Raptee@10.0.0.4:554/stream1

@@ -1,44 +1,35 @@
 mqtt:
   enabled: false
 
-# Hardware detection acceleration: defaults to CPU
-# If you have an Intel CPU with OpenVINO or a Coral TPU, you can enable it here
-# detectors:
-#   ov:
-#     type: openvino
-#     device: CPU
+# OpenVINO Detector & YOLOv8 Model Configuration (Frigate 0.14)
+detectors:
+  ov:
+    type: openvino
+    device: CPU
 
-# Enable go2rtc for ultra low-latency WebRTC/MSE streaming and stream sharing
-go2rtc:
-  streams:
-    showroom_cam_157:
-      - "rtsp://admin:CCTV%40Raptee@10.0.0.157:554/stream1"
-    showroom_cam_009:
-      - "rtsp://admin:CCTV%40Raptee@10.0.0.9:554/ch01/stream1"
-    showroom_cam_152:
-      - "rtsp://admin:CCTV%40Raptee@10.0.0.152:554/ch02/stream1"
-    showroom_cam_056:
-      - "rtsp://admin:CCTV%40Raptee@10.0.0.56:554/ch04/stream1"
+model:
+  path: /config/model_cache/yolov8n.onnx
+  labelmap_path: /config/model_cache/coco-80.txt
+  model_type: yolo-generic
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_pixel_format: rgb
+  input_dtype: float
 
-# Global detection and object tracking settings
+# Global detection and object tracking settings (Applies to all cameras automatically)
 objects:
   track:
     - person
     - motorcycle
-    - car
-    - bicycle
 
-# Birdseye view: combined live view of all 4 cameras
 birdseye:
   enabled: true
   mode: continuous
 
-# Recording configuration
+# Global recording retention configuration
 record:
   enabled: true
-  retain:
-    days: 3
-    mode: all
   alerts:
     retain:
       days: 14
@@ -48,12 +39,21 @@ record:
       days: 7
       mode: motion
 
+# Enable go2rtc for ultra low-latency WebRTC/MSE streaming and stream sharing
+# Add your cameras below. Replace <username>, <password>, and <camera_ip> with your actual camera details.
+go2rtc:
+  streams:
+    camera_1:
+      - rtsp://admin:password@<camera_ip>:554/stream1
+    # camera_2:
+    #   - rtsp://admin:password@<camera_ip>:554/stream1
+
 # Camera definitions
 cameras:
-  showroom_cam_157:
+  camera_1:
     ffmpeg:
       inputs:
-        - path: "rtsp://127.0.0.1:8554/showroom_cam_157"
+        - path: rtsp://127.0.0.1:8554/camera_1
           input_args: preset-rtsp-restream
           roles:
             - record
@@ -64,44 +64,12 @@ cameras:
       height: 1080
       fps: 5
 
-  showroom_cam_009:
-    ffmpeg:
-      inputs:
-        - path: "rtsp://127.0.0.1:8554/showroom_cam_009"
-          input_args: preset-rtsp-restream
-          roles:
-            - record
-            - detect
-    detect:
-      enabled: true
-      width: 1920
-      height: 1080
-      fps: 5
+    # Custom zones can be drawn interactively using your mouse in the Frigate UI (http://localhost:5000)!
+    # Go to: Settings -> Cameras -> camera_1 -> Zones
+    # zones:
+    #   entrance:
+    #     coordinates: 0.1,0.2,0.3,0.4...
 
-  showroom_cam_152:
-    ffmpeg:
-      inputs:
-        - path: "rtsp://127.0.0.1:8554/showroom_cam_152"
-          input_args: preset-rtsp-restream
-          roles:
-            - record
-            - detect
-    detect:
-      enabled: true
-      width: 1920
-      height: 1080
-      fps: 5
-
-  showroom_cam_056:
-    ffmpeg:
-      inputs:
-        - path: "rtsp://127.0.0.1:8554/showroom_cam_056"
-          input_args: preset-rtsp-restream
-          roles:
-            - record
-            - detect
-    detect:
-      enabled: true
-      width: 1920
-      height: 1080
-      fps: 5
+snapshots:
+  timestamp: true
+  crop: true

@@ -49,27 +49,110 @@ go2rtc:
     #   - rtsp://admin:password@<camera_ip>:554/stream1
 
 # Camera definitions
+    showroom:
+      - rtsp://admin:CCTV@Raptee@10.0.0.157:554/stream1
+    capitol_:
+      - ffmpeg:rtsp://admin:CCTV@Raptee@10.0.0.56:554/stream1
+    quality_inspection:
+      - ffmpeg:rtsp://admin:CCTV@Raptee@10.0.0.41:554/stream1
+    electronics_lab:
+      - ffmpeg:rtsp://admin:CCTV@Raptee@10.0.0.4:554/stream1
 cameras:
-  camera_1:
+  showroom:
+    enabled: true
     ffmpeg:
       inputs:
-        - path: rtsp://127.0.0.1:8554/camera_1
-          input_args: preset-rtsp-restream
+        - path: rtsp://admin:CCTV@Raptee@10.0.0.157:554/stream1
           roles:
-            - record
             - detect
     detect:
-      enabled: true
-      width: 1920
-      height: 1080
-      fps: 5
-
-    # Custom zones can be drawn interactively using your mouse in the Frigate UI (http://localhost:5000)!
-    # Go to: Settings -> Cameras -> camera_1 -> Zones
-    # zones:
-    #   entrance:
-    #     coordinates: 0.1,0.2,0.3,0.4...
-
+      width: 1280
+      height: 720
+    live:
+      streams:
+        Stream 1: showroom
+    zones:
+      t30_skeleton:
+        coordinates: 0.265,0.306,0.4,0.455,0.616,0.322,0.546,0.149
+        enabled: true
+        inertia: 3
+        loitering_time: 10
+        friendly_name: T30 Skeleton
+      showroom_sofa:
+        coordinates: 0.007,0.519,0.16,0.994,0.549,0.734,0.227,0.308
+        enabled: true
+        inertia: 3
+        loitering_time: 20
+        friendly_name: showroom sofa
+      footfall:
+        coordinates: 0.593,0.225,0.652,0.282,0.737,0.175,0.699,0.125
+        enabled: true
+        inertia: 2
+        loitering_time: 0
+  capitol_:
+    enabled: true
+    friendly_name: 'capitol '
+    ffmpeg:
+      inputs:
+        - path: rtsp://admin:CCTV@Raptee@10.0.0.56:554/stream1
+          roles:
+            - detect
+    detect:
+      width: 1280
+      height: 720
+    live:
+      streams:
+        Stream 1: capitol_
+    zones:
+      capitol_sofa:
+        coordinates: 0.357,0.29,0.695,0.97,0.986,0.575,0.678,0.201
+        enabled: true
+        inertia: 3
+        loitering_time: 5
+        friendly_name: capitol sofa
+  quality_inspection:
+    enabled: true
+    friendly_name: quality inspection
+    ffmpeg:
+      inputs:
+        - path: rtsp://admin:CCTV@Raptee@10.0.0.41:554/stream1
+          roles:
+            - detect
+    detect:
+      width: 1280
+      height: 720
+    live:
+      streams:
+        Stream 1: quality_inspection
+    zones:
+      qi_table_:
+        coordinates: 0.275,0.513,0.572,0.885,0.792,0.557,0.463,0.322
+        enabled: true
+        inertia: 3
+        loitering_time: 5
+        friendly_name: 'qi table '
+  electronics_lab:
+    enabled: true
+    friendly_name: electronics lab
+    ffmpeg:
+      inputs:
+        - path: rtsp://admin:CCTV@Raptee@10.0.0.4:554/stream1
+          roles:
+            - detect
+    detect:
+      width: 1280
+      height: 720
+    live:
+      streams:
+        Stream 1: electronics_lab
+    zones:
+      electronics_t30_red:
+        coordinates: 0.081,0.421,0.283,0.891,0.565,0.455,0.369,0.177
+        enabled: true
+        inertia: 3
+        loitering_time: 0
+        friendly_name: electronics t30 red
 snapshots:
   timestamp: true
   crop: true
+version: 0.18-0

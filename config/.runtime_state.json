@@ -1,0 +1,20 @@
+{
+  "cameras": {
+    "capitol_": {
+      "detect": true,
+      "recordings": false
+    },
+    "electronics_lab": {
+      "detect": true,
+      "recordings": false
+    },
+    "quality_inspection": {
+      "detect": true,
+      "recordings": false
+    },
+    "showroom": {
+      "detect": true,
+      "recordings": false
+    }
+  }
+}

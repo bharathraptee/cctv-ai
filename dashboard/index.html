@@ -215,6 +215,215 @@
       font-weight: 500;
     }
 
+    /* Direction Selector */
+    .direction-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.25rem 0.65rem;
+    }
+
+    .direction-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .direction-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 0.78rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .direction-select:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    /* Section Headers */
+    .section-header-compact {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title-sm {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Per-Camera Live Occupancy Grid */
+    .camera-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .camera-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .camera-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+    }
+
+    .camera-card.active-presence {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--bg-card) 100%);
+    }
+
+    .cam-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cam-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: 0.03em;
+    }
+
+    .cam-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.7rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .cam-badge.live {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .cam-badge.idle {
+      background: rgba(156, 163, 175, 0.1);
+      color: var(--text-muted);
+      border: 1px solid rgba(156, 163, 175, 0.2);
+    }
+
+    .cam-count {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 0.15rem;
+    }
+
+    .cam-subtext {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* All Zones KPI Grid */
+    .zones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .zone-kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .zone-kpi-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+    }
+
+    .zone-kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .zone-kpi-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: capitalize;
+    }
+
+    .zone-cam-tag {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      font-weight: 600;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .zone-kpi-metric {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      margin-top: 0.2rem;
+    }
+
+    .zone-kpi-metric .num {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--accent-orange);
+    }
+
+    .zone-kpi-metric .unit {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .zone-kpi-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     /* Charts Row */
     .charts-grid {
       display: grid;
@@ -407,6 +616,16 @@
       </div>
     </div>
     <div class="header-controls">
+      <div class="direction-control">
+        <label for="footfallDirectionSelect" class="direction-label">Footfall Inflow:</label>
+        <select id="footfallDirectionSelect" class="direction-select" onchange="onDirectionChange()">
+          <option value="none">Any Direction (Time Spent / Total Visits)</option>
+          <option value="top_down">Top-to-Bottom (↓ In / ↑ Out)</option>
+          <option value="bottom_up">Bottom-to-Top (↑ In / ↓ Out)</option>
+          <option value="left_right">Left-to-Right (→ In / ← Out)</option>
+          <option value="right_left">Right-to-Left (← In / → Out)</option>
+        </select>
+      </div>
       <div class="live-badge">
         <div class="live-dot"></div>
         LIVE SYNC
@@ -422,7 +641,7 @@
     <!-- KPI Overview Cards -->
     <div class="kpi-grid">
       <div class="kpi-card cyan">
-        <div class="kpi-label">Today's Footfall (In)</div>
+        <div class="kpi-label" id="kpiFootfallLabel">Today's Footfall</div>
         <div class="kpi-value" id="kpiTotalFootfall">—</div>
         <div class="kpi-subtext" id="kpiFootfallSubtext">Crossed footfall line</div>
       </div>
@@ -443,6 +662,19 @@
         <div class="kpi-label">Avg Dwell Time</div>
         <div class="kpi-value" id="kpiAvgDwell">—</div>
         <div class="kpi-subtext" id="kpiPeakHour">Peak Hour: Calculating...</div>
+      </div>
+    </div>
+
+    <!-- Live Camera Occupancy (Real-time by connected camera) -->
+    <div class="cameras-section">
+      <div class="section-header-compact">
+        <div class="section-title-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+          Live Camera Occupancy (Not Combined)
+        </div>
+      </div>
+      <div id="cameraOccupancyGrid" class="camera-grid">
+        <div class="camera-card"><div class="cam-subtext">Discovering connected cameras...</div></div>
       </div>
     </div>
 
@@ -472,6 +704,19 @@
         <div class="chart-container">
           <canvas id="zoneChart"></canvas>
         </div>
+      </div>
+    </div>
+
+    <!-- Camera Zones Performance (Separate KPIs for All Zones & All Cameras) -->
+    <div class="zones-section">
+      <div class="section-header-compact">
+        <div class="section-title-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+          All Camera Zones Performance (Individual KPIs)
+        </div>
+      </div>
+      <div id="allZonesGrid" class="zones-grid">
+        <div class="zone-kpi-card"><div class="cam-subtext">Loading zone metrics...</div></div>
       </div>
     </div>
 
@@ -550,25 +795,53 @@
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Helper: Determine movement direction (in vs out) using trajectory vector (Method A)
-    function getMovementDirection(event) {
+    // Direction selection management
+    function getSelectedDirection() {
+      const select = document.getElementById('footfallDirectionSelect');
+      if (select && select.value) return select.value;
+      return localStorage.getItem('footfall_direction') || 'none';
+    }
+
+    function onDirectionChange() {
+      const select = document.getElementById('footfallDirectionSelect');
+      if (select) {
+        localStorage.setItem('footfall_direction', select.value);
+        loadDashboardData();
+      }
+    }
+
+    // Helper: Determine movement direction using trajectory vector
+    function getMovementDirection(event, direction) {
+      if (!direction) direction = getSelectedDirection();
+      if (direction === 'none') return 'neutral';
+
       if (event && event.data) {
         // 1. Check path_data trajectory points if available
+        // Frigate format: [ [ [x, y], timestamp ], ... ]
         if (Array.isArray(event.data.path_data) && event.data.path_data.length >= 2) {
           const first = event.data.path_data[0];
           const last = event.data.path_data[event.data.path_data.length - 1];
-          const dy = last[1] - first[1]; // Y movement (inward vs outward)
-          const dx = last[0] - first[0];
-          if (Math.abs(dy) >= Math.abs(dx)) {
-            return dy >= 0 ? 'in' : 'out';
-          } else {
-            return dx >= 0 ? 'in' : 'out';
+
+          // Extract [x, y] coordinates safely
+          const p0 = (Array.isArray(first) && Array.isArray(first[0])) ? first[0] : (Array.isArray(first) ? first : null);
+          const p1 = (Array.isArray(last) && Array.isArray(last[0])) ? last[0] : (Array.isArray(last) ? last : null);
+
+          if (p0 && p1 && typeof p0[0] === 'number' && typeof p1[0] === 'number') {
+            const dx = p1[0] - p0[0];
+            const dy = p1[1] - p0[1];
+
+            if (direction === 'top_down') return dy >= 0 ? 'in' : 'out';
+            if (direction === 'bottom_up') return dy < 0 ? 'in' : 'out';
+            if (direction === 'left_right') return dx >= 0 ? 'in' : 'out';
+            if (direction === 'right_left') return dx < 0 ? 'in' : 'out';
           }
         }
-        // 2. Fallback to velocity_angle (0 to 180 = downward/inward, 180 to 360 = upward/outward)
+        // 2. Fallback to velocity_angle (0 to 180 = downward, 180 to 360 = upward)
         if (typeof event.data.velocity_angle === 'number') {
           const angle = event.data.velocity_angle;
-          return (angle >= 0 && angle <= 180) ? 'in' : 'out';
+          const isDown = (angle >= 0 && angle <= 180);
+          if (direction === 'top_down') return isDown ? 'in' : 'out';
+          if (direction === 'bottom_up') return !isDown ? 'in' : 'out';
         }
       }
       return 'in';
@@ -584,65 +857,88 @@
     // Main Data Fetcher
     async function loadDashboardData() {
       try {
-        const [eventsRes, inProgressRes] = await Promise.all([
+        const [eventsRes, inProgressRes, configRes] = await Promise.all([
           fetch(`${API_BASE}/api/events?limit=500`).catch(() => null),
-          fetch(`${API_BASE}/api/events?in_progress=1`).catch(() => null)
+          fetch(`${API_BASE}/api/events?in_progress=1`).catch(() => null),
+          fetch(`${API_BASE}/api/config`).catch(() => null)
         ]);
 
         if (!eventsRes || !eventsRes.ok) return;
 
         const events = await eventsRes.json();
         const inProgressEvents = inProgressRes && inProgressRes.ok ? await inProgressRes.json() : [];
+        const frigateConfig = configRes && configRes.ok ? await configRes.json() : null;
 
-        processMetrics(events, inProgressEvents);
+        processMetrics(events, inProgressEvents, frigateConfig);
       } catch (err) {
         console.error("Dashboard data load error:", err);
       }
     }
 
-    function processMetrics(events, activeEvents) {
+    function processMetrics(events, activeEvents, frigateConfig) {
+      const chosenDir = getSelectedDirection();
+      const dirSelect = document.getElementById('footfallDirectionSelect');
+      if (dirSelect && dirSelect.value !== chosenDir) {
+        dirSelect.value = chosenDir;
+      }
+
       const now = new Date();
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
 
       const todayPersons = events.filter(e => e.label === 'person' && (e.start_time >= startOfDay || !e.end_time));
       const activePersonCount = activeEvents.filter(e => e.label === 'person').length;
 
-      // --- METHOD A: FOOTFALL VIA 'footfall' TRIPWIRE ZONE ---
+      // 1. FOOTFALL ZONE CALCULATION
       const footfallEvents = todayPersons.filter(e => {
         const zones = e.zones || e.entered_zones || [];
         return zones.some(z => z.toLowerCase().includes('footfall'));
       });
 
       const hasFootfallZone = footfallEvents.length > 0;
-      let inCount = 0;
-      let outCount = 0;
       const targetFootfallEvents = hasFootfallZone ? footfallEvents : todayPersons;
 
-      targetFootfallEvents.forEach(e => {
-        const dir = getMovementDirection(e);
-        if (dir === 'in') inCount++;
-        else outCount++;
-      });
+      let inCount = 0;
+      let outCount = 0;
 
-      if (!hasFootfallZone) {
-        // Fallback: If 'footfall' zone is not yet drawn, count detected persons as In
-        inCount = todayPersons.length;
-        outCount = 0;
+      if (chosenDir === 'none') {
+        // Any direction: Count total visits & calculate dwell time
+        const totalVisits = targetFootfallEvents.length;
+        const completedFootfall = targetFootfallEvents.filter(e => e.end_time && e.start_time);
+        const totalDwell = completedFootfall.reduce((acc, e) => acc + (e.end_time - e.start_time), 0);
+        const avgDwell = completedFootfall.length > 0 ? (totalDwell / completedFootfall.length) : 0;
+
+        document.getElementById('kpiFootfallLabel').textContent = "Today's Footfall";
+        document.getElementById('kpiTotalFootfall').textContent = totalVisits;
+        document.getElementById('kpiFootfallSubtext').textContent = hasFootfallZone
+          ? `Crossed 'footfall' zone (Any Direction) • Avg Time: ${formatDuration(avgDwell)}`
+          : `All visitors detected today (Draw a 'footfall' zone in Frigate UI)`;
+      } else {
+        // Directional mode
+        targetFootfallEvents.forEach(e => {
+          const dir = getMovementDirection(e, chosenDir);
+          if (dir === 'in') inCount++;
+          else outCount++;
+        });
+
+        if (!hasFootfallZone) {
+          inCount = todayPersons.length;
+          outCount = 0;
+        }
+
+        document.getElementById('kpiFootfallLabel').textContent = "Today's Footfall (In)";
+        document.getElementById('kpiTotalFootfall').textContent = inCount;
+        document.getElementById('kpiFootfallSubtext').textContent = hasFootfallZone
+          ? `Crossed 'footfall' line (In: ${inCount} | Out: ${outCount})`
+          : `All people (Draw a 'footfall' zone in UI for line-crossing)`;
       }
 
       const netInside = Math.max(0, inCount - outCount);
 
-      // KPI 1: Footfall (In)
-      document.getElementById('kpiTotalFootfall').textContent = inCount;
-      document.getElementById('kpiFootfallSubtext').textContent = hasFootfallZone
-        ? `Crossed 'footfall' line (In: ${inCount} | Out: ${outCount})`
-        : `All people (Draw a 'footfall' zone in UI for line-crossing)`;
-
       // KPI 2: Currently in Showroom
-      document.getElementById('kpiActiveVisitors').textContent = activePersonCount > 0 ? activePersonCount : netInside;
-      document.getElementById('kpiActiveSubtext').textContent = hasFootfallZone
-        ? `Net inside: ${netInside} (In: ${inCount} - Out: ${outCount})`
-        : `Active visitors detected right now`;
+      document.getElementById('kpiActiveVisitors').textContent = activePersonCount > 0 ? activePersonCount : (chosenDir !== 'none' ? netInside : 0);
+      document.getElementById('kpiActiveSubtext').textContent = activePersonCount > 0
+        ? `Active visitors detected across all cameras right now`
+        : (hasFootfallZone && chosenDir !== 'none' ? `Net inside: ${netInside} (In: ${inCount} - Out: ${outCount})` : `No active visitors detected right now`);
 
       // Dynamic Zone Visits: Count visitors who entered any configured zone
       const zoneEvents = todayPersons.filter(e => {
@@ -661,16 +957,16 @@
       const avgDwellSec = completedEvents.length > 0 ? totalDuration / completedEvents.length : 0;
       document.getElementById('kpiAvgDwell').textContent = formatDuration(avgDwellSec);
 
-      // Hourly Distribution Data (9 AM to 9 PM) - Incoming Footfall
+      // Hourly Distribution Data (9 AM to 9 PM)
       const hourCounts = {};
       for (let h = 9; h <= 21; h++) hourCounts[h] = 0;
 
       let peakHour = 17;
       let peakCount = 0;
 
-      const hourlySource = hasFootfallZone
-        ? footfallEvents.filter(e => getMovementDirection(e) === 'in')
-        : todayPersons;
+      const hourlySource = (chosenDir === 'none')
+        ? (hasFootfallZone ? footfallEvents : todayPersons)
+        : (hasFootfallZone ? footfallEvents.filter(e => getMovementDirection(e, chosenDir) === 'in') : todayPersons);
 
       hourlySource.forEach(e => {
         const d = new Date(e.start_time * 1000);
@@ -687,10 +983,155 @@
       const peakHourFormatted = `${peakHour % 12 || 12}:00 ${peakHour >= 12 ? 'PM' : 'AM'}`;
       document.getElementById('kpiPeakHour').textContent = `Peak Rush: ~${peakHourFormatted}`;
 
+      // Render per-camera occupancy and separate zone KPIs
+      renderCameraOccupancy(events, activeEvents, frigateConfig);
+      renderAllZonesKPIs(todayPersons, activeEvents, frigateConfig);
+
       renderHourlyChart(hourCounts, peakHour);
       renderZoneChart(todayPersons);
       renderDwellChart(completedEvents);
-      renderTable(todayPersons.slice(0, 20));
+      renderTable(todayPersons.slice(0, 20), chosenDir);
+    }
+
+    // --- PER-CAMERA LIVE OCCUPANCY ---
+    function renderCameraOccupancy(events, activeEvents, frigateConfig) {
+      const container = document.getElementById('cameraOccupancyGrid');
+      if (!container) return;
+
+      const cameraSet = new Set();
+      if (frigateConfig && frigateConfig.cameras) {
+        Object.keys(frigateConfig.cameras).forEach(cam => cameraSet.add(cam));
+      }
+      events.forEach(e => { if (e.camera) cameraSet.add(e.camera); });
+      activeEvents.forEach(e => { if (e.camera) cameraSet.add(e.camera); });
+
+      const cameraList = Array.from(cameraSet).sort();
+
+      if (cameraList.length === 0) {
+        container.innerHTML = '<div class="camera-card"><div class="cam-subtext">No cameras connected or detected yet.</div></div>';
+        return;
+      }
+
+      container.innerHTML = cameraList.map(cam => {
+        const activeCount = activeEvents.filter(e => e.camera === cam && e.label === 'person').length;
+        const todayCount = events.filter(e => e.camera === cam && e.label === 'person').length;
+        const displayName = cam.replace(/_/g, ' ').toUpperCase();
+        const isLive = activeCount > 0;
+
+        return `
+          <div class="camera-card ${isLive ? 'active-presence' : ''}">
+            <div class="cam-header">
+              <span class="cam-name">${displayName}</span>
+              <span class="cam-badge ${isLive ? 'live' : 'idle'}">
+                <span class="${isLive ? 'live-dot' : ''}" style="${!isLive ? 'width:6px;height:6px;border-radius:50%;background:#6B7280;display:inline-block;' : ''}"></span>
+                ${isLive ? `${activeCount} ACTIVE` : 'IDLE'}
+              </span>
+            </div>
+            <div class="cam-count">${activeCount}</div>
+            <div class="cam-subtext">${activeCount === 1 ? 'Person currently here' : 'People currently here'} &bull; ${todayCount} today</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- ALL ZONES KPI GRID (SEPARATE PER CAMERA & ZONE) ---
+    function renderAllZonesKPIs(todayPersons, activeEvents, frigateConfig) {
+      const container = document.getElementById('allZonesGrid');
+      if (!container) return;
+
+      const zoneMap = {};
+
+      // 1. Pre-populate from Frigate config if available
+      if (frigateConfig && frigateConfig.cameras) {
+        Object.entries(frigateConfig.cameras).forEach(([camName, camData]) => {
+          if (camData && camData.zones) {
+            Object.keys(camData.zones).forEach(zName => {
+              const key = `${camName}::${zName}`;
+              zoneMap[key] = {
+                camera: camName,
+                zone: zName,
+                visits: 0,
+                totalSec: 0,
+                completedCount: 0,
+                activeNow: 0
+              };
+            });
+          }
+        });
+      }
+
+      // 2. Aggregate from today's person events
+      todayPersons.forEach(e => {
+        const zones = e.zones || e.entered_zones || [];
+        const duration = (e.end_time && e.start_time) ? (e.end_time - e.start_time) : 0;
+        zones.forEach(z => {
+          const key = `${e.camera}::${z}`;
+          if (!zoneMap[key]) {
+            zoneMap[key] = {
+              camera: e.camera,
+              zone: z,
+              visits: 0,
+              totalSec: 0,
+              completedCount: 0,
+              activeNow: 0
+            };
+          }
+          zoneMap[key].visits++;
+          if (duration > 0) {
+            zoneMap[key].totalSec += duration;
+            zoneMap[key].completedCount++;
+          }
+        });
+      });
+
+      // 3. Aggregate active persons currently in zones
+      activeEvents.forEach(e => {
+        if (e.label === 'person') {
+          const zones = e.current_zones || e.zones || [];
+          zones.forEach(z => {
+            const key = `${e.camera}::${z}`;
+            if (zoneMap[key]) {
+              zoneMap[key].activeNow++;
+            }
+          });
+        }
+      });
+
+      const zoneEntries = Object.values(zoneMap);
+
+      if (zoneEntries.length === 0) {
+        container.innerHTML = `
+          <div class="zone-kpi-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 1.5rem;">
+            No camera zones detected yet. Configure zones in Frigate UI (Settings &rarr; Cameras &rarr; Zones) to track distinct displays and areas.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = zoneEntries.map(item => {
+        const avgDwell = item.completedCount > 0 ? (item.totalSec / item.completedCount) : 0;
+        const displayName = item.zone.replace(/_/g, ' ');
+        const camTag = item.camera.replace(/_/g, ' ').toUpperCase();
+
+        return `
+          <div class="zone-kpi-card">
+            <div class="zone-kpi-top">
+              <span class="zone-kpi-title">${displayName}</span>
+              <span class="zone-cam-tag">${camTag}</span>
+            </div>
+            <div class="zone-kpi-metric">
+              <span class="num">${item.visits}</span>
+              <span class="unit">${item.visits === 1 ? 'Visit Today' : 'Visits Today'}</span>
+            </div>
+            <div class="zone-kpi-footer">
+              <span>Avg Dwell: <strong>${formatDuration(avgDwell)}</strong></span>
+              <span style="${item.activeNow > 0 ? 'color: var(--accent-green); font-weight: 600;' : ''}">
+                ${item.activeNow > 0 ? `🟢 ${item.activeNow} Active` : 'Idle'}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     // --- STANDARD CHARTS RENDERING ---
@@ -854,7 +1295,7 @@
       });
     }
 
-    function renderTable(events) {
+    function renderTable(events, chosenDir) {
       const tbody = document.getElementById('eventsTableBody');
       if (!events || events.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="status-msg">No visitor events recorded yet. Walk in front of cameras to generate data!</td></tr>';
@@ -865,8 +1306,12 @@
         const durationSec = e.end_time ? (e.end_time - e.start_time) : 0;
         const zones = e.zones || e.entered_zones || [];
         const isFootfall = zones.some(z => z.toLowerCase().includes('footfall'));
-        const dir = isFootfall ? getMovementDirection(e) : null;
-        const dirBadge = dir ? (dir === 'in' ? ' (IN)' : ' (OUT)') : '';
+        const dir = isFootfall ? getMovementDirection(e, chosenDir) : null;
+        let dirBadge = '';
+        if (dir === 'in') dirBadge = ' (IN)';
+        else if (dir === 'out') dirBadge = ' (OUT)';
+        else if (dir === 'neutral') dirBadge = ' (Crossed)';
+
         const zoneBadge = zones.length > 0
           ? `<span class="badge badge-zone-general">${zones.map(z => z.replace(/_/g, ' ')).join(', ')}${dirBadge}</span>`
           : `<span style="color: var(--text-muted);">General</span>`;
@@ -887,6 +1332,11 @@
         `;
       }).join('');
     }
+
+    // Set initial direction selection from storage
+    const initialDir = localStorage.getItem('footfall_direction') || 'none';
+    const initSelect = document.getElementById('footfallDirectionSelect');
+    if (initSelect) initSelect.value = initialDir;
 
     // Initial Load
     loadDashboardData();
